@@ -1,0 +1,52 @@
+<!-- 
+Apprixmation of Pi using random numbers
+
+Reresh the page to get a new approximation
+
+- John Proserpio
+-->
+<html>
+    <head>
+        <script src="d3.v3.min.js" charset="utf-8"></script>
+        <style>
+            svg {border: solid black 1px;}
+        </style>
+    </head>
+    
+    <body>
+        
+        <div id="pi"></div>
+        <div id="canvas"></div>
+        
+        <script>
+            var points = [];
+            var numPoints = 100000;
+            var numPointsInside = 0;
+            
+            for (var i=0; i<numPoints; i++){
+                points[i] = {x: Math.random(), y: Math.random(), color: "#dddddd"};
+                
+                if ( (points[i].x * points[i].x) + (points[i].y * points[i].y) < 1.0 ){
+                    points[i].color = "#dd0000";
+                    numPointsInside++;
+                }
+            }
+            
+            var xScale = d3.scale.linear().domain([0,1]).range([0,200]);
+            
+            var yScale = d3.scale.linear().domain([0,1]).range([200,0]);
+            
+            var svg = d3.select("#canvas").append("svg").attr("height", 200).attr("width", 200);
+            
+            points.forEach(
+              function(point){
+                svg.append("circle").attr("cx", xScale(point.x)).attr("cy", yScale(point.y)).attr("r", 3).style("fill", point.color);
+              }
+            );
+            
+            d3.select("#pi").text(4*numPointsInside / numPoints);
+        </script>
+        
+    </body>
+    
+</html>

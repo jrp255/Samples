@@ -1,0 +1,93 @@
+<!--
+Generate a geometric distribution and plot on a histogram
+
+Click on the chart to plot a new point
+
+- John Proserpio
+-->
+
+<html>
+<head>
+	<script src="d3.v3.min.js"></script>
+</head>
+
+<body>
+	
+	<div id="histogram"></div>
+	
+	<script>
+	var randomGeometric = function (p) {
+		return Math.floor(Math.log(Math.random()) / Math.log(1.0 - p));
+	}
+	
+	// Generate a large number of values from the 
+	//  distribution.
+	var sequence = new Array(100);
+	for (var i = 0; i < sequence.length; i++) {
+		sequence[i] = randomGeometric(0.5);
+	}
+	
+	var height = 300;
+	var width = 400;
+	
+	var svg = d3.select("#histogram").append("svg")
+	.attr("height", height)
+	.attr("width", width);
+	
+	var padding = 50;
+	
+	// Create a discrete scale from a finite set of input values to
+	//  an appropriately selected set of pixels from the specified range.
+	var xScale = d3.scale.ordinal()
+	  .domain(d3.range(0,20)).rangeRoundBands([0 + padding, width]);
+	
+	var histogram = d3.layout.histogram().range([0,20]).bins(20);
+	var bins = histogram(sequence);
+	var binWidth = bins[0].dx;
+	
+	// Generate a y scale for the bin heights
+	var yScale = d3.scale.linear()
+	  .domain([0, d3.max(bins, function (bin) { return bin.y; })])
+	  .range([height - padding, 10]);
+	
+	var bars = svg.selectAll(".bar")
+	  .data(bins);
+
+  // Three helper functions that we will use to set attributes
+  var barTransform = function (bar) { return "translate(" + xScale(bar.x) + ", " + yScale(bar.y) + ")"; };
+	var barHeight = function (bar) { return height - padding - yScale(bar.y); };
+	var barCount = function (bar) { return bar.y;};
+	
+	bars.enter().append("g").attr("class", "bar");
+	
+	bars.attr("transform", barTransform);
+	bars.append("rect")
+	  .attr("x", 1)
+	  .attr("width", xScale(binWidth) - xScale(0) - 1)
+	  .attr("height", barHeight);
+	
+	bars.append("text").text(barCount);
+	
+	// When we click on the SVG element, sample a new point.
+	svg.on("click", function () {
+		sequence.push(randomGeometric(0.5));
+		bins = histogram(sequence);
+		yScale.domain([0, d3.max(bins, function (bin) { return bin.y; })]);
+		bars.data(bins);
+		bars.transition().attr("transform", barTransform);
+   bars.select("rect").transition()
+	    .attr("height", barHeight);
+		bars.select("text").transition()
+		  .text(barCount);
+	});
+	</script>
+	
+</body>
+</html>
+
+
+
+
+
+
+
